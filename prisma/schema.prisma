@@ -1,0 +1,383 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  VISITOR
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContactStatus {
+  UNREAD
+  READ
+  ARCHIVED
+}
+
+enum MeetingApprovalMode {
+  APPROVAL_REQUIRED
+  AUTO_APPROVAL
+}
+
+enum MeetingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+  RESCHEDULED
+  CANCELLED
+}
+
+enum MeetingDuration {
+  MINUTES_15
+  MINUTES_30
+  MINUTES_45
+  MINUTES_60
+}
+
+enum ResumeStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum AnalyticsEventType {
+  PAGE_VIEW
+  UNIQUE_VISITOR
+  RESUME_DOWNLOAD
+  PROJECT_VIEW
+  BLOG_VIEW
+  MEETING_REQUEST
+  CONTACT_REQUEST
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  PROJECT_CREATED
+  PROJECT_UPDATED
+  PROJECT_DELETED
+  BLOG_CREATED
+  BLOG_UPDATED
+  BLOG_DELETED
+  MEETING_APPROVED
+  MEETING_REJECTED
+  MEETING_RESCHEDULED
+  CERTIFICATION_CREATED
+  CERTIFICATION_UPDATED
+  CERTIFICATION_DELETED
+  RESUME_UPLOADED
+  RESUME_RESTORED
+  CONTACT_READ
+  CONTACT_DELETED
+  AVAILABILITY_UPDATED
+  SETTINGS_UPDATED
+}
+
+model User {
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String?
+  email         String    @unique
+  passwordHash  String
+  role          Role      @default(VISITOR)
+  imageUrl      String?
+  emailVerified DateTime?
+  lastLoginAt   DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  projectsCreated       Project[]       @relation("ProjectCreatedBy")
+  projectsUpdated       Project[]       @relation("ProjectUpdatedBy")
+  blogsAuthored         Blog[]          @relation("BlogAuthor")
+  certificationsCreated Certification[] @relation("CertificationCreatedBy")
+  resumeFilesUploaded   ResumeFile[]    @relation("ResumeUploadedBy")
+  auditLogs             AuditLog[]
+
+  @@index([role])
+  @@map("users")
+}
+
+model Project {
+  id             String   @id @default(uuid()) @db.Uuid
+  title          String
+  slug           String   @unique
+  description    String
+  content        String?
+  techStack      String[]
+  githubUrl      String?
+  liveUrl        String?
+  featured       Boolean  @default(false)
+  isPublished    Boolean  @default(true)
+  seoTitle       String?
+  seoDescription String?
+  seoKeywords    String[]
+  openGraphImage String?
+  viewCount      Int      @default(0)
+  createdById    String?  @db.Uuid
+  updatedById    String?  @db.Uuid
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  createdBy User?          @relation("ProjectCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedBy User?          @relation("ProjectUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  images    ProjectImage[]
+  analytics Analytics[]
+
+  @@index([featured, isPublished])
+  @@index([createdAt])
+  @@map("projects")
+}
+
+model ProjectImage {
+  id         String   @id @default(uuid()) @db.Uuid
+  projectId  String   @db.Uuid
+  url        String
+  secureUrl  String
+  publicId   String
+  altText    String
+  width      Int?
+  height     Int?
+  sortOrder  Int      @default(0)
+  isFeatured Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sortOrder])
+  @@map("project_images")
+}
+
+model Blog {
+  id              String     @id @default(uuid()) @db.Uuid
+  title           String
+  slug            String     @unique
+  content         String
+  excerpt         String
+  featuredImage   String?
+  featuredImageId String?
+  status          BlogStatus @default(DRAFT)
+  publishedAt     DateTime?
+  seoTitle        String?
+  seoDescription  String?
+  seoKeywords     String[]
+  openGraphImage  String?
+  viewCount       Int        @default(0)
+  authorId        String?    @db.Uuid
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  author    User?       @relation("BlogAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  tags      BlogTag[]
+  analytics Analytics[]
+
+  @@index([status, publishedAt])
+  @@index([createdAt])
+  @@map("blogs")
+}
+
+model BlogTag {
+  id        String   @id @default(uuid()) @db.Uuid
+  blogId    String   @db.Uuid
+  name      String
+  slug      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  blog Blog @relation(fields: [blogId], references: [id], onDelete: Cascade)
+
+  @@unique([blogId, slug])
+  @@index([slug])
+  @@map("blog_tags")
+}
+
+model Certification {
+  id              String    @id @default(uuid()) @db.Uuid
+  name            String
+  issuer          String
+  issueDate       DateTime
+  expirationDate  DateTime?
+  credentialUrl   String?
+  certificateUrl  String?
+  certificateType String?
+  cloudinaryId    String?
+  imageUrl        String?
+  pdfUrl          String?
+  sortOrder       Int       @default(0)
+  createdById     String?   @db.Uuid
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  createdBy User? @relation("CertificationCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([issueDate])
+  @@index([sortOrder])
+  @@map("certifications")
+}
+
+model ResumeFile {
+  id            String       @id @default(uuid()) @db.Uuid
+  version       Int
+  fileName      String
+  fileUrl       String
+  secureUrl     String
+  publicId      String
+  mimeType      String
+  sizeBytes     Int
+  status        ResumeStatus @default(ARCHIVED)
+  downloadCount Int          @default(0)
+  uploadedById  String?      @db.Uuid
+  uploadedAt    DateTime     @default(now())
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  uploadedBy User?       @relation("ResumeUploadedBy", fields: [uploadedById], references: [id], onDelete: SetNull)
+  analytics  Analytics[]
+
+  @@unique([version])
+  @@index([status])
+  @@map("resume_files")
+}
+
+model ContactMessage {
+  id        String        @id @default(uuid()) @db.Uuid
+  name      String
+  email     String
+  subject   String
+  message   String
+  status    ContactStatus @default(UNREAD)
+  ipAddress String?
+  userAgent String?
+  readAt    DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status, createdAt])
+  @@index([email])
+  @@map("contact_messages")
+}
+
+model MeetingRequest {
+  id                    String              @id @default(uuid()) @db.Uuid
+  fullName              String
+  email                 String
+  phone                 String?
+  company               String?
+  purpose               String
+  preferredDate         DateTime
+  preferredTime         String
+  startAt               DateTime?
+  endAt                 DateTime?
+  duration              MeetingDuration
+  status                MeetingStatus       @default(PENDING)
+  approvalMode          MeetingApprovalMode
+  googleCalendarEventId String?
+  googleMeetUrl         String?
+  adminNotes            String?
+  rejectionReason       String?
+  rescheduleReason      String?
+  ipAddress             String?
+  userAgent             String?
+  approvedAt            DateTime?
+  rejectedAt            DateTime?
+  completedAt           DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@unique([startAt, endAt])
+  @@index([status, preferredDate])
+  @@index([email])
+  @@map("meeting_requests")
+}
+
+model Availability {
+  id              String              @id @default(uuid()) @db.Uuid
+  dayOfWeek       Int
+  isWorkingDay    Boolean             @default(true)
+  startTime       String
+  endTime         String
+  timezone        String              @default("Asia/Kolkata")
+  approvalMode    MeetingApprovalMode @default(APPROVAL_REQUIRED)
+  defaultDuration MeetingDuration     @default(MINUTES_30)
+  vacationMode    Boolean             @default(false)
+  customSlots     Json?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@unique([dayOfWeek])
+  @@map("availability")
+}
+
+model BlockedDate {
+  id        String   @id @default(uuid()) @db.Uuid
+  date      DateTime
+  startTime String?
+  endTime   String?
+  reason    String?
+  isFullDay Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+  @@map("blocked_dates")
+}
+
+model Analytics {
+  id           String             @id @default(uuid()) @db.Uuid
+  eventType    AnalyticsEventType
+  visitorId    String?
+  sessionId    String?
+  path         String
+  referrer     String?
+  source       String?
+  country      String?
+  region       String?
+  city         String?
+  ipAddress    String?
+  userAgent    String?
+  projectId    String?            @db.Uuid
+  blogId       String?            @db.Uuid
+  resumeFileId String?            @db.Uuid
+  metadata     Json?
+  createdAt    DateTime           @default(now())
+
+  project    Project?    @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  blog       Blog?       @relation(fields: [blogId], references: [id], onDelete: SetNull)
+  resumeFile ResumeFile? @relation(fields: [resumeFileId], references: [id], onDelete: SetNull)
+
+  @@index([eventType, createdAt])
+  @@index([visitorId])
+  @@index([path])
+  @@index([projectId])
+  @@index([blogId])
+  @@map("analytics")
+}
+
+model AuditLog {
+  id        String      @id @default(uuid()) @db.Uuid
+  action    AuditAction
+  userId    String?     @db.Uuid
+  entity    String?
+  entityId  String?
+  message   String
+  ipAddress String?
+  userAgent String?
+  metadata  Json?
+  createdAt DateTime    @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([action, createdAt])
+  @@index([userId])
+  @@map("audit_logs")
+}
