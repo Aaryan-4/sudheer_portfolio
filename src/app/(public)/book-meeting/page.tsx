@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { MeetingForm } from "@/components/forms/meeting-form";
 import { SectionHeading } from "@/components/marketing/section-heading";
 import { Calendar, Clock, Laptop } from "lucide-react";
@@ -54,7 +55,10 @@ export default function BookMeetingPage() {
         </div>
 
         <div className="border border-zinc-200/60 bg-white p-8 rounded-2xl shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
-          <h2 className="font-sora text-xl font-bold text-navy dark:text-white mb-6 font-poppins">Select Date &amp; Time</h2>
+          <h2 className="font-sora text-xl font-bold text-navy dark:text-white mb-4 font-poppins">Select Date &amp; Time</h2>
+          <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-6">
+            <strong>Before booking a meeting, kindly check for available slots on the <Link href="/availability" className="text-coral underline hover:text-coral/80">Availability page</Link>.</strong>
+          </p>
           <MeetingForm />
         </div>
       </motion.div>
