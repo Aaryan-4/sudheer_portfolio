@@ -1,30 +1,35 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-export const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const smtpUser = process.env.SMTP_USER ?? "aaryanshete197@gmail.com";
+const smtpPass = process.env.SMTP_PASS ?? "sani odct fggo aomc";
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
+  auth: {
+    user: smtpUser,
+    pass: smtpPass
+  }
+});
 
 export async function sendEmail(input: {
   to: string;
   subject: string;
   html: string;
 }): Promise<void> {
-  // Add these two lines:
-  console.log("DEBUG: Checking Resend Status...");
-  console.log("DEBUG: RESEND_API_KEY is present:", !!process.env.RESEND_API_KEY);
-
-  if (!resend) {
-    console.error("🔥 ERROR: Resend object is null! API Key is missing from environment.");
-    return;
-  }
-  
+  console.log("DEBUG: Sending email via Gmail SMTP to:", input.to);
   try {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM ?? "Sudheer Portfolio <onboarding@resend.dev>",
+    await transporter.sendMail({
+      from: `"Sudheer Kumar" <${smtpUser}>`,
       to: input.to,
       subject: input.subject,
       html: input.html
     });
-    console.log("DEBUG: Email sent successfully!");
+    console.log("DEBUG: Email sent successfully via Gmail!");
   } catch (error) {
-    console.error("🔥 ERROR: Resend failed to send:", error);
+    console.error("🔥 ERROR: Gmail SMTP failed to send:", error);
   }
 }
+export const resend = null; // Maintained for client backwards compatibility
