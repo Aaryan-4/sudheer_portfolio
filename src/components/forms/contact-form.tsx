@@ -31,7 +31,7 @@ export function ContactForm() {
       <Input name="email" type="email" placeholder="Email" required />
       <Input name="subject" placeholder="Subject" required />
       <Textarea name="message" placeholder="Message" required />
-      <Button type="submit">
+      <Button type="submit" className="bg-coral text-white hover:bg-coral/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-full px-6 py-5 shadow-md shadow-coral/10 font-poppins mt-2">
         <Send className="mr-2 h-4 w-4" />
         Send message
       </Button>

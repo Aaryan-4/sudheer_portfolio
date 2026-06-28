@@ -33,14 +33,14 @@ export function MeetingForm() {
       <Input name="company" placeholder="Company" />
       <Input name="preferredDate" type="date" required />
       <Input name="preferredTime" type="time" required />
-      <select name="duration" className="h-10 rounded-md border bg-background px-3 text-sm" defaultValue="MINUTES_30">
+      <select name="duration" className="h-10 rounded-md border border-zinc-200 bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-primary dark:border-zinc-800" defaultValue="MINUTES_30">
         <option value="MINUTES_15">15 minutes</option>
         <option value="MINUTES_30">30 minutes</option>
         <option value="MINUTES_45">45 minutes</option>
         <option value="MINUTES_60">60 minutes</option>
       </select>
       <Textarea name="purpose" placeholder="Purpose" required />
-      <Button type="submit">
+      <Button type="submit" className="bg-coral text-white hover:bg-coral/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 rounded-full px-6 py-5 shadow-md shadow-coral/10 font-poppins mt-2">
         <CalendarPlus className="mr-2 h-4 w-4" />
         Request meeting
       </Button>
