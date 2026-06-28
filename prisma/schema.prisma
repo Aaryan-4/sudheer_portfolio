@@ -386,9 +386,10 @@ model AuditLog {
 model BlockedSlot {
   id        String   @id @default(uuid()) @db.Uuid
   date      DateTime
-  hour      Int      // 9 to 20 (representing 9:00 AM to 8:00 PM)
+  hour      Int
+  minute    Int      @default(0)
   createdAt DateTime @default(now())
 
-  @@unique([date, hour])
+  @@unique([date, hour, minute])
   @@map("blocked_slots")
 }
