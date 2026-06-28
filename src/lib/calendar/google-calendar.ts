@@ -35,26 +35,31 @@ export async function createCalendarEvent(input: CalendarEventInput): Promise<{
     return {};
   }
 
-  const response = await calendar.events.insert({
-    calendarId: process.env.GOOGLE_CALENDAR_ID,
-    conferenceDataVersion: 1,
-    requestBody: {
-      summary: input.summary,
-      description: input.description,
-      start: { dateTime: input.startAt.toISOString() },
-      end: { dateTime: input.endAt.toISOString() },
-      attendees: [{ email: input.attendeeEmail }],
-      conferenceData: {
-        createRequest: {
-          requestId: crypto.randomUUID(),
-          conferenceSolutionKey: { type: "hangoutsMeet" }
+  try {
+    const response = await calendar.events.insert({
+      calendarId: process.env.GOOGLE_CALENDAR_ID,
+      conferenceDataVersion: 1,
+      requestBody: {
+        summary: input.summary,
+        description: input.description,
+        start: { dateTime: input.startAt.toISOString() },
+        end: { dateTime: input.endAt.toISOString() },
+        attendees: [{ email: input.attendeeEmail }],
+        conferenceData: {
+          createRequest: {
+            requestId: crypto.randomUUID(),
+            conferenceSolutionKey: { type: "hangoutsMeet" }
+          }
         }
       }
-    }
-  });
+    });
 
-  return {
-    eventId: response.data.id ?? undefined,
-    meetUrl: response.data.hangoutLink ?? undefined
-  };
+    return {
+      eventId: response.data.id ?? undefined,
+      meetUrl: response.data.hangoutLink ?? undefined
+    };
+  } catch (error) {
+    console.error("🔥 ERROR: Google Calendar event creation failed:", error);
+    return {};
+  }
 }
