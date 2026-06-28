@@ -7,6 +7,6 @@ export const siteConfig = {
   author: "Sudheer Kumar",
   links: {
     github: "https://github.com/",
-    linkedin: "https://www.linkedin.com/"
+    linkedin: "https://www.linkedin.com/in/sudheer-kumar-aitha-5a0435130/"
   }
 };
