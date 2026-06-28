@@ -2,7 +2,7 @@ import { addMinutes } from "date-fns";
 import { createCalendarEvent } from "@/lib/calendar/google-calendar";
 import { AppError } from "@/lib/errors/app-error";
 import { sendEmail } from "@/lib/email/resend";
-import { meetingStatusTemplate } from "@/lib/email/templates";
+import { meetingStatusTemplate, meetingApprovalTemplate, meetingDeclineTemplate } from "@/lib/email/templates";
 import { assertRateLimit } from "@/lib/rate-limit/memory-rate-limit";
 import { sanitizeOptionalText, sanitizeText } from "@/lib/security/sanitize";
 import { prisma } from "@/lib/db/prisma";
@@ -121,10 +121,24 @@ export async function approveMeeting(id: string) {
     googleMeetUrl: calendar.meetUrl
   });
 
+  const formattedDate = new Date(meeting.preferredDate).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+
   await sendEmail({
     to: meeting.email,
-    subject: "Meeting approved",
-    html: meetingStatusTemplate("approved", calendar.meetUrl ? `Join with Google Meet: ${calendar.meetUrl}` : "Your meeting has been approved.")
+    subject: "Meeting Confirmed - Sudheer Kumar",
+    html: meetingApprovalTemplate({
+      clientName: meeting.fullName,
+      date: formattedDate,
+      time: meeting.preferredTime,
+      duration: meeting.duration.replace("MINUTES_", ""),
+      purpose: meeting.purpose,
+      googleMeetUrl: calendar.meetUrl
+    })
   });
 
   return approved;
@@ -142,10 +156,22 @@ export async function rejectMeeting(id: string) {
     data: { status: "CANCELLED" }
   });
 
+  const formattedDate = new Date(meeting.preferredDate).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+
   await sendEmail({
     to: meeting.email,
-    subject: "Meeting declined",
-    html: meetingStatusTemplate("declined", "Your meeting request has been declined.")
+    subject: "Meeting Update - Sudheer Kumar",
+    html: meetingDeclineTemplate({
+      clientName: meeting.fullName,
+      date: formattedDate,
+      time: meeting.preferredTime,
+      purpose: meeting.purpose
+    })
   });
 
   return rejected;
