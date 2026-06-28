@@ -18,7 +18,15 @@ const DEFINED_SLOTS = [
   { hour: 10, minute: 30, label: "10:30 AM - 11:00 AM" },
   { hour: 11, minute: 0, label: "11:00 AM - 11:30 AM" },
   { hour: 11, minute: 30, label: "11:30 AM - 12:00 PM" },
-  { hour: 12, minute: 0, label: "12:00 PM - 12:30 PM" }
+  { hour: 12, minute: 0, label: "12:00 PM - 12:30 PM" },
+  { hour: 12, minute: 30, label: "12:30 PM - 01:00 PM" },
+  { hour: 13, minute: 0, label: "01:00 PM - 01:30 PM" },
+  { hour: 13, minute: 30, label: "01:30 PM - 02:00 PM" },
+  { hour: 14, minute: 0, label: "02:00 PM - 02:30 PM" },
+  { hour: 14, minute: 30, label: "02:30 PM - 03:00 PM" },
+  { hour: 15, minute: 0, label: "03:00 PM - 03:30 PM" },
+  { hour: 15, minute: 30, label: "03:30 PM - 04:00 PM" },
+  { hour: 16, minute: 0, label: "04:00 PM - 04:30 PM" }
 ];
 
 export async function GET(request: NextRequest) {
@@ -90,7 +98,7 @@ const hourlyBlockoutSchema = z.object({
   date: z.string(),
   blockedSlots: z.array(
     z.object({
-      hour: z.number().int().min(9).max(12),
+      hour: z.number().int().min(9).max(16),
       minute: z.number().int().min(0).max(59)
     })
   )

@@ -21,7 +21,6 @@ interface DayAvailability {
 
 export function AdminHourlyBlockoutPanel() {
   const [selectedDate, setSelectedDate] = useState<string>(() => {
-    // Default to local today date YYYY-MM-DD
     return new Date().toLocaleDateString("en-CA");
   });
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -61,6 +60,24 @@ export function AdminHourlyBlockoutPanel() {
     return () => {
       active = false;
     };
+  }, [selectedDate]);
+
+  // Automatically roll over selectedDate if it's set to "today" and the day ends (passes midnight)
+  useEffect(() => {
+    const todayStr = new Date().toLocaleDateString("en-CA");
+    
+    // Set up check interval
+    const intervalId = setInterval(() => {
+      const currentToday = new Date().toLocaleDateString("en-CA");
+      const pageWasSetToToday = selectedDate === todayStr;
+      
+      if (currentToday !== todayStr && pageWasSetToToday) {
+        console.log("Midnight rollover detected! Shifting selected date to new day:", currentToday);
+        setSelectedDate(currentToday);
+      }
+    }, 60000);
+
+    return () => clearInterval(intervalId);
   }, [selectedDate]);
 
   function handleToggleSlot(hour: number, minute: number) {
@@ -125,6 +142,7 @@ export function AdminHourlyBlockoutPanel() {
         </CardTitle>
         <CardDescription className="text-zinc-500 dark:text-zinc-400">
           Select a date to customize your availability. Red slots are marked as Occupied (Blocked), green slots are Available.
+          All slots automatically reset to Available daily at midnight/12:30 AM rollover.
         </CardDescription>
       </CardHeader>
 
@@ -167,7 +185,7 @@ export function AdminHourlyBlockoutPanel() {
         {/* Hourly Slots Toggles */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 animate-pulse">
-            {Array.from({ length: 7 }).map((_, i) => (
+            {Array.from({ length: 15 }).map((_, i) => (
               <div key={i} className="h-16 rounded-xl bg-zinc-100 dark:bg-zinc-900" />
             ))}
           </div>
