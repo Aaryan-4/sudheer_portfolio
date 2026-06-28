@@ -114,11 +114,13 @@ export async function approveMeeting(id: string) {
     attendeeEmail: meeting.email
   });
 
+  const googleMeetUrl = calendar.meetUrl ?? process.env.NEXT_PUBLIC_GOOGLE_MEET_URL ?? undefined;
+
   const approved = await meetingsRepository.approve(id, {
     startAt,
     endAt,
     googleCalendarEventId: calendar.eventId,
-    googleMeetUrl: calendar.meetUrl
+    googleMeetUrl: googleMeetUrl
   });
 
   const formattedDate = new Date(meeting.preferredDate).toLocaleDateString("en-US", {
@@ -137,7 +139,7 @@ export async function approveMeeting(id: string) {
       time: meeting.preferredTime,
       duration: meeting.duration.replace("MINUTES_", ""),
       purpose: meeting.purpose,
-      googleMeetUrl: calendar.meetUrl
+      googleMeetUrl: googleMeetUrl || undefined
     })
   });
 
