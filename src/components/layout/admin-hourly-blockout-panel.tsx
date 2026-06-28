@@ -185,7 +185,7 @@ export function AdminHourlyBlockoutPanel() {
         {/* Hourly Slots Toggles */}
         {isLoading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 animate-pulse">
-            {Array.from({ length: 15 }).map((_, i) => (
+            {Array.from({ length: 30 }).map((_, i) => (
               <div key={i} className="h-16 rounded-xl bg-zinc-100 dark:bg-zinc-900" />
             ))}
           </div>
