@@ -39,7 +39,7 @@ export function AdminHourlyBlockoutPanel() {
     fetch(`/api/availability/hours?date=${selectedDate}`)
       .then((res) => res.json())
       .then((resData) => {
-        if (active && resData.success && resData.data[0]) {
+        if (active && resData.data && resData.data[0]) {
           const dayData: DayAvailability = resData.data[0];
           setSlots(dayData.slots);
           
@@ -89,16 +89,24 @@ export function AdminHourlyBlockoutPanel() {
       });
 
       const resData = await response.json();
-      if (!response.ok || !resData.success) {
+      if (!response.ok || !resData.data?.success) {
         throw new Error(resData.error?.message || "Failed to save blockouts");
       }
 
       setMessage({ type: "success", text: "Hourly availability updated successfully!" });
       
-      // Refresh current slot list
-      if (resData.data) {
-        setSlots(resData.data.slots);
-      }
+      // Update local slots state status to match blocked selection
+      setSlots((prev) =>
+        prev.map((slot) => {
+          const isBlocked = blockedSlots.some(
+            (s) => s.hour === slot.hour && s.minute === slot.minute
+          );
+          return {
+            ...slot,
+            status: isBlocked ? "occupied" : "available"
+          };
+        })
+      );
     } catch (err) {
       setMessage({
         type: "error",

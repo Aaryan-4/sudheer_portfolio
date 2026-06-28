@@ -31,8 +31,10 @@ export default function AvailabilityPage() {
     fetch(`/api/availability/hours?date=${localToday}`)
       .then((res) => res.json())
       .then((resData) => {
-        if (resData.success && resData.data[0]) {
+        if (resData.data && resData.data[0]) {
           setAvailability(resData.data[0]);
+        } else {
+          setAvailability(null);
         }
       })
       .catch((err) => console.error("Error fetching availability:", err))
