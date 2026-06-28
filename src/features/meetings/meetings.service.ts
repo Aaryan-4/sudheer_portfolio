@@ -129,3 +129,25 @@ export async function approveMeeting(id: string) {
 
   return approved;
 }
+
+export async function rejectMeeting(id: string) {
+  const meeting = await prisma.meetingRequest.findUnique({ where: { id } });
+
+  if (!meeting) {
+    throw new AppError("Meeting not found", 404, "MEETING_NOT_FOUND");
+  }
+
+  const rejected = await prisma.meetingRequest.update({
+    where: { id },
+    data: { status: "CANCELLED" }
+  });
+
+  await sendEmail({
+    to: meeting.email,
+    subject: "Meeting declined",
+    html: meetingStatusTemplate("declined", "Your meeting request has been declined.")
+  });
+
+  return rejected;
+}
+
