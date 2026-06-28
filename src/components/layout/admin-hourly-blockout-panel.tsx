@@ -1,0 +1,218 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { Loader2, Save, Calendar, Check, AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+
+interface Slot {
+  hour: number;
+  label: string;
+  status: "available" | "occupied" | "closed";
+}
+
+interface DayAvailability {
+  date: string;
+  dayName: string;
+  slots: Slot[];
+}
+
+export function AdminHourlyBlockoutPanel() {
+  const [selectedDate, setSelectedDate] = useState<string>(() => {
+    return new Date().toISOString().split("T")[0];
+  });
+  const [slots, setSlots] = useState<Slot[]>([]);
+  const [blockedHours, setBlockedHours] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Fetch slots whenever the selectedDate changes
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+    setMessage(null);
+
+    fetch(`/api/availability/hours?date=${selectedDate}`)
+      .then((res) => res.json())
+      .then((resData) => {
+        if (active && resData.success && resData.data[0]) {
+          const dayData: DayAvailability = resData.data[0];
+          setSlots(dayData.slots);
+          
+          // Identify which hours are manually blocked or occupied in the data
+          // We can initialize the toggles. Any slot that is currently "occupied" is set to blocked
+          // unless it is a closed day.
+          const initiallyBlocked = dayData.slots
+            .filter((s) => s.status === "occupied")
+            .map((s) => s.hour);
+          setBlockedHours(initiallyBlocked);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching hourly availability:", err);
+        if (active) setMessage({ type: "error", text: "Failed to load slots for this date." });
+      })
+      .finally(() => {
+        if (active) setIsLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [selectedDate]);
+
+  function handleToggleHour(hour: number) {
+    setBlockedHours((prev) => {
+      if (prev.includes(hour)) {
+        return prev.filter((h) => h !== hour);
+      } else {
+        return [...prev, hour];
+      }
+    });
+  }
+
+  async function handleSave() {
+    setIsSaving(true);
+    setMessage(null);
+
+    try {
+      const response = await fetch("/api/availability/hours", {
+        method: "POST",
+        body: JSON.stringify({
+          date: selectedDate,
+          blockedHours: blockedHours
+        }),
+        headers: { "Content-Type": "application/json" }
+      });
+
+      const resData = await response.json();
+      if (!response.ok || !resData.success) {
+        throw new Error(resData.error?.message || "Failed to save blockouts");
+      }
+
+      setMessage({ type: "success", text: "Hourly blockouts saved successfully!" });
+      
+      // Refresh current slot list
+      const dayData = resData.data;
+      if (dayData) {
+        setSlots(dayData.slots);
+      }
+    } catch (err) {
+      setMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Error saving hourly blockouts"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  return (
+    <Card className="border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950">
+      <CardHeader>
+        <CardTitle className="font-poppins text-xl font-bold text-navy dark:text-white">
+          Hourly Blockout Manager
+        </CardTitle>
+        <CardDescription className="text-zinc-500 dark:text-zinc-400">
+          Select a date to customize your hourly availability. Red slots represent blocked times, green slots represent available times.
+        </CardDescription>
+      </CardHeader>
+
+      <div className="p-6 pt-0 space-y-6">
+        {/* Date Selector */}
+        <div className="flex flex-col gap-2 max-w-xs">
+          <label className="text-sm font-semibold text-zinc-700 dark:text-zinc-300">
+            Target Date
+          </label>
+          <div className="relative">
+            <Input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="pl-10 h-10"
+              disabled={isLoading || isSaving}
+            />
+            <Calendar className="absolute left-3 top-3 h-4 w-4 text-zinc-400" />
+          </div>
+        </div>
+
+        {/* Message Alert */}
+        {message && (
+          <div
+            className={`flex items-start gap-2.5 p-4 rounded-xl text-sm border font-medium ${
+              message.type === "success"
+                ? "bg-emerald-50/30 border-emerald-100/50 text-emerald-800 dark:bg-emerald-950/10 dark:border-emerald-900/20 dark:text-emerald-400"
+                : "bg-rose-50/30 border-rose-100/50 text-rose-800 dark:bg-rose-950/10 dark:border-rose-900/20 dark:text-rose-400"
+            }`}
+          >
+            {message.type === "success" ? (
+              <Check className="h-5 w-5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <AlertCircle className="h-5 w-5 shrink-0 text-rose-600 dark:text-rose-400" />
+            )}
+            <span>{message.text}</span>
+          </div>
+        )}
+
+        {/* 12 Hour Slots Grid */}
+        {isLoading ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 animate-pulse">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="h-14 rounded-xl bg-zinc-100 dark:bg-zinc-900" />
+            ))}
+          </div>
+        ) : slots.length === 0 ? (
+          <div className="text-center py-6 text-zinc-500">No slots available for this day.</div>
+        ) : (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+              {slots.map((slot) => {
+                const isBlocked = blockedHours.includes(slot.hour);
+                const isOriginallyClosed = slot.status === "closed";
+
+                return (
+                  <button
+                    key={slot.hour}
+                    type="button"
+                    onClick={() => handleToggleHour(slot.hour)}
+                    disabled={isOriginallyClosed || isSaving}
+                    className={`flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer ${
+                      isOriginallyClosed
+                        ? "bg-zinc-100 border-zinc-200 text-zinc-400 cursor-not-allowed dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-600"
+                        : isBlocked
+                        ? "bg-rose-50 border-rose-200 text-rose-800 dark:bg-rose-950/20 dark:border-rose-900/30 dark:text-rose-400"
+                        : "bg-emerald-50 border-emerald-200 text-emerald-800 dark:bg-emerald-950/20 dark:border-emerald-900/30 dark:text-emerald-400"
+                    }`}
+                  >
+                    <span className="font-poppins text-xs font-bold">{slot.label}</span>
+                    <span className="text-[10px] font-medium mt-1 uppercase tracking-wider opacity-85">
+                      {isOriginallyClosed ? "Closed (Day)" : isBlocked ? "Occupied" : "Available"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Action Bar */}
+            <div className="flex justify-end pt-2">
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="bg-coral text-white hover:bg-coral/90 rounded-full px-6 font-poppins"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2" />
+                )}
+                Save Hourly Blockouts
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}

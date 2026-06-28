@@ -10,7 +10,6 @@ function getCalendarClient() {
     throw new Error("Missing environment variables in .env file.");
   }
 
-  // Remove surrounding quotes and replace literal \n with newlines
   privateKey = privateKey.replace(/^["']|["']$/g, "");
   privateKey = privateKey.replace(/\\n/g, "\n");
 
@@ -24,33 +23,27 @@ function getCalendarClient() {
 }
 
 async function test() {
-  console.log("Running direct Google Calendar API diagnostics...");
+  console.log("Verifying service account write permissions...");
   try {
     const calendar = getCalendarClient();
     
-    console.log("1. Authenticating & inserting test event...");
+    // We create a basic event without attendees and without Meet conference
     const response = await calendar.events.insert({
       calendarId: process.env.GOOGLE_CALENDAR_ID,
-      conferenceDataVersion: 1,
       requestBody: {
-        summary: "Diagnostic Test Event",
-        description: "Testing Google Meet Link Generation",
-        start: { dateTime: new Date(Date.now() + 60 * 60 * 1000).toISOString() },
-        end: { dateTime: new Date(Date.now() + 90 * 60 * 1000).toISOString() },
-        conferenceData: {
-          createRequest: {
-            requestId: crypto.randomUUID(),
-            conferenceSolutionKey: { type: "eventHangout" }
-          }
-        }
+        summary: "🎉 API Setup Verified Successfully!",
+        description: "This event proves that the Service Account has successfully authenticated and has full write access to your Google Calendar.",
+        start: { dateTime: new Date(Date.now() + 60 * 60 * 1000).toISOString() }, // 1 hour from now
+        end: { dateTime: new Date(Date.now() + 90 * 60 * 1000).toISOString() }
       }
     });
 
     console.log("✅ SUCCESS!");
+    console.log("Event created successfully!");
     console.log("Event ID:", response.data.id);
-    console.log("Meet URL:", response.data.hangoutLink);
+    console.log("Check your Google Calendar - this event should now be visible!");
   } catch (error) {
-    console.error("❌ DIAGNOSTIC FAILED with error:");
+    console.error("❌ API verification failed:");
     console.error(error);
   }
 }

@@ -382,3 +382,13 @@ model AuditLog {
   @@index([userId])
   @@map("audit_logs")
 }
+
+model BlockedSlot {
+  id        String   @id @default(uuid()) @db.Uuid
+  date      DateTime
+  hour      Int      // 9 to 20 (representing 9:00 AM to 8:00 PM)
+  createdAt DateTime @default(now())
+
+  @@unique([date, hour])
+  @@map("blocked_slots")
+}

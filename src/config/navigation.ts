@@ -5,7 +5,7 @@ export const publicNavigation = [
   { href: "/experience", label: "Experience" },
   { href: "/projects", label: "Projects" },
   { href: "/blogs", label: "Blogs" },
-  { href: "/resume", label: "Resume" },
+  { href: "/availability", label: "Availability" },
   { href: "/contact", label: "Contact" }
 ];
 
@@ -14,7 +14,6 @@ export const adminNavigation = [
   { href: "/admin/projects", label: "Projects" },
   { href: "/admin/blogs", label: "Blogs" },
   { href: "/admin/certifications", label: "Certifications" },
-  { href: "/admin/resume", label: "Resume" },
   { href: "/admin/contacts", label: "Contacts" },
   { href: "/admin/meetings", label: "Meetings" },
   { href: "/admin/availability", label: "Availability" },
