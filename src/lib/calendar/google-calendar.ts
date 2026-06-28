@@ -9,12 +9,16 @@ export type CalendarEventInput = {
 };
 
 function getCalendarClient() {
-  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-  const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
+  const clientEmail = process.env.GOOGLE_CLIENT_EMAIL?.trim();
+  let privateKey = process.env.GOOGLE_PRIVATE_KEY?.trim();
 
   if (!clientEmail || !privateKey || !process.env.GOOGLE_CALENDAR_ID) {
     return null;
   }
+
+  // Remove surrounding quotes and replace literal \n with newlines
+  privateKey = privateKey.replace(/^["']|["']$/g, "");
+  privateKey = privateKey.replace(/\\n/g, "\n");
 
   const auth = new google.auth.JWT({
     email: clientEmail,
