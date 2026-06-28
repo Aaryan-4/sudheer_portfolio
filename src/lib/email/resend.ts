@@ -18,7 +18,7 @@ export async function sendEmail(input: {
   
   try {
     await resend.emails.send({
-      from: process.env.EMAIL_FROM ?? "Sudheer Portfolio <noreply@example.com>",
+      from: process.env.EMAIL_FROM ?? "Sudheer Portfolio <onboarding@resend.dev>",
       to: input.to,
       subject: input.subject,
       html: input.html
