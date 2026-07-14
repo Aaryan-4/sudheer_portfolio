@@ -91,28 +91,53 @@ export function HomeClient({ initialProjects }: HomeClientProps) {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.1 }}
-              className="relative flex justify-center lg:justify-end float-animation"
+              className="relative flex justify-center lg:justify-end items-center float-animation"
             >
-              {/* Decorative background elements and rings */}
-              <div className="absolute right-1/2 top-1/2 h-[350px] w-[350px] -translate-y-1/2 translate-x-1/2 rounded-full border border-coral/10 dark:border-coral/5" />
-              <div className="absolute right-1/2 top-1/2 h-[420px] w-[420px] -translate-y-1/2 translate-x-1/2 rounded-full border border-navy/5 dark:border-navy/2" />
-              
-              <div className="relative overflow-hidden rounded-[2.5rem] border-4 border-white bg-white shadow-2xl shadow-navy/10 dark:border-zinc-800 dark:bg-zinc-950 w-[280px] h-[373px] sm:w-[320px] sm:h-[427px] lg:w-[380px] lg:h-[507px] transition-transform duration-300">
-                <Image
-                  src="/profile.jpg"
-                  alt="Sudheer Kumar"
-                  fill
-                  priority
-                  className="object-cover"
-                  sizes="(max-width: 768px) 320px, 380px"
+              <div 
+                className="relative flex items-center justify-center cursor-pointer"
+                onClick={() => {
+                  document.getElementById('about')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                {/* Glowing Outer Gradient Ring */}
+                <motion.div 
+                  className="absolute rounded-full bg-gradient-to-r from-coral via-pink-500 to-navy opacity-45 blur-md w-[210px] h-[210px] sm:w-[250px] sm:h-[250px] lg:w-[290px] lg:h-[290px]"
+                  animate={{
+                    scale: [1, 1.04, 1],
+                    rotate: 360
+                  }}
+                  transition={{
+                    duration: 8,
+                    repeat: Infinity,
+                    ease: "linear"
+                  }}
                 />
+
+                {/* Pulsing Concentric Outer Ring */}
+                <div className="absolute h-[240px] w-[240px] sm:h-[280px] sm:w-[280px] lg:h-[320px] lg:w-[320px] rounded-full border border-coral/20 animate-ping opacity-25 pointer-events-none" />
+
+                {/* Main Circular Image Wrapper */}
+                <motion.div
+                  whileHover={{ scale: 1.06, rotate: 1.5 }}
+                  whileTap={{ scale: 0.96 }}
+                  className="relative overflow-hidden rounded-full border-4 border-coral/30 bg-zinc-950 shadow-2xl shadow-coral/10 w-[200px] h-[200px] sm:w-[240px] sm:h-[240px] lg:w-[280px] lg:h-[280px] transition-all duration-300 hover:border-coral"
+                >
+                  <Image
+                    src="/profile.jpg"
+                    alt="Sudheer Kumar"
+                    fill
+                    priority
+                    className="object-cover object-top"
+                    sizes="(max-width: 768px) 240px, 280px"
+                  />
+                </motion.div>
               </div>
             </motion.div>
           </div>
         </section>
 
         {/* Feature Cards Section */}
-        <section className="container py-24 relative">
+        <section id="about" className="container py-24 relative">
           <motion.div
             variants={containerVariants}
             initial="hidden"
