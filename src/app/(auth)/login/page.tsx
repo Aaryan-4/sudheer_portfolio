@@ -36,7 +36,7 @@ export default async function LoginPage() {
           <h1 className="text-2xl font-semibold">Admin login</h1>
           <p className="mt-1 text-sm text-muted-foreground">Access the protected dashboard.</p>
         </div>
-        <Input name="email" type="email" placeholder="Email" required />
+        <Input name="email" type="text" placeholder="Username" required />
         <Input name="password" type="password" placeholder="Password" required />
         <Button type="submit" className="w-full">
           Sign in
