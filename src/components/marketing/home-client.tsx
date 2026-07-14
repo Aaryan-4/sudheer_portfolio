@@ -49,7 +49,7 @@ export function HomeClient({ initialProjects }: HomeClientProps) {
   };
 
   return (
-    <main className="overflow-hidden bg-white dark:bg-zinc-950 relative min-h-screen">
+    <main className="overflow-hidden bg-transparent relative min-h-screen">
       {/* WebGL Aurora background */}
       <AuroraBackground />
 

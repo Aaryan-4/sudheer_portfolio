@@ -4,7 +4,7 @@ import { Github, Linkedin } from "lucide-react";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-zinc-950">
+    <div className="flex min-h-screen flex-col bg-transparent">
       <PublicHeader />
       <div className="flex-1">{children}</div>
       <footer className="border-t border-zinc-200/50 bg-zinc-50/40 py-12 dark:border-zinc-900 dark:bg-zinc-900/10 font-poppins">
