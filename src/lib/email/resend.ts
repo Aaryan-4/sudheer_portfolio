@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-const smtpUser = process.env.SMTP_USER ?? "aaryanshete197@gmail.com";
+const smtpUser = process.env.SMTP_USER ?? "sudheerkumaraitha@gmail.com";
 const smtpPass = process.env.SMTP_PASS ?? "sani odct fggo aomc";
 
 const transporter = nodemailer.createTransport({
