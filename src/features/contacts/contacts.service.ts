@@ -17,7 +17,7 @@ export async function submitContact(input: ContactInput, meta: { ipAddress?: str
   const message = await contactsRepository.create({ ...data, ...meta });
 
   await sendEmail({
-    to: process.env.ADMIN_EMAIL ?? data.email,
+    to: process.env.SMTP_USER ?? "sudheerkumaraitha@gmail.com",
     subject: `Portfolio contact: ${data.subject}`,
     html: contactSubmissionTemplate(data.name, data.message)
   });

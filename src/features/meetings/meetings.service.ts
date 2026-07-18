@@ -39,13 +39,14 @@ export async function submitMeetingRequest(input: MeetingRequestInput, meta: { i
     html: meetingStatusTemplate("request received", "Your meeting request has been received. You will be notified once it is approved.")
   });
 
-  if (process.env.ADMIN_EMAIL) {
+  const adminEmail = process.env.SMTP_USER ?? "sudheerkumaraitha@gmail.com";
+  if (adminEmail) {
     const formattedDate = typeof data.preferredDate === "string" 
       ? data.preferredDate 
       : new Date(data.preferredDate).toLocaleDateString("en-US", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       
     await sendEmail({
-      to: process.env.ADMIN_EMAIL,
+      to: adminEmail,
       subject: `[Portfolio Meeting Request] ${data.fullName}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; color: #1F2937;">

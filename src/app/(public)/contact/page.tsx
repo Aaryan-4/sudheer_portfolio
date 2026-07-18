@@ -27,7 +27,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <span className="font-poppins text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Email</span>
-                <p className="font-sans text-sm font-semibold text-navy dark:text-white">contact@example.com</p>
+                <p className="font-sans text-sm font-semibold text-navy dark:text-white">sudheerkumaraitha@gmail.com</p>
               </div>
             </div>
             
