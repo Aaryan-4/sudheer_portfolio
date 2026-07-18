@@ -41,19 +41,18 @@ export function meetingApprovalTemplate(data: {
             <td style="padding: 6px 0; font-weight: 600; color: #0F2B5B; font-size: 14px;">Purpose:</td>
             <td style="padding: 6px 0; color: #4B5563; font-size: 14px; font-style: italic;">"${data.purpose}"</td>
           </tr>
+          ${data.googleMeetUrl ? `
+          <tr>
+            <td style="padding: 6px 0; font-weight: 600; color: #0F2B5B; font-size: 14px;">Meeting Link:</td>
+            <td style="padding: 6px 0; font-size: 14px;">
+              <a href="${data.googleMeetUrl}" target="_blank" style="color: #FF6B57; text-decoration: underline; font-weight: bold;">
+                ${data.googleMeetUrl}
+              </a>
+            </td>
+          </tr>
+          ` : ""}
         </table>
       </div>
-
-      ${data.googleMeetUrl ? `
-      <div style="text-align: center; margin: 28px 0;">
-        <a href="${data.googleMeetUrl}" target="_blank" style="background-color: #FF6B57; color: white; padding: 12px 24px; font-weight: 600; text-decoration: none; border-radius: 50px; font-size: 14px; display: inline-block;">
-          Join Google Meet
-        </a>
-        <p style="margin-top: 10px; font-size: 12px; color: #9CA3AF;">
-          Or copy link: <a href="${data.googleMeetUrl}" style="color: #FF6B57; text-decoration: underline;">${data.googleMeetUrl}</a>
-        </p>
-      </div>
-      ` : ""}
 
       <p style="font-size: 13px; color: #9CA3AF; text-align: center; border-top: 1px solid #F1F5F9; padding-top: 14px; margin-top: 28px;">
         Sent automatically by Sudheer's Portfolio Platform.
